@@ -1,0 +1,132 @@
+package com.cuneytayyldz.herseyihatirla.db;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import com.cuneytayyldz.herseyihatirla.models.Kisi;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by cuneytayyldz on 001, 1, 12, 2016.
+ */
+
+public class DatabaseManager {
+    private int VERSION = 1;
+    private String DATABASE_NAME = "database.db";
+    private Context context;
+    private SQLiteDatabase db;
+    private DatabaseHelper dbHelper;
+
+    public DatabaseManager(Context _context) {
+        context = _context;
+        dbHelper = new DatabaseHelper(_context);
+    }
+
+    public DatabaseManager open() {
+        db = dbHelper.getWritableDatabase();
+        return this;
+    }
+
+    public void close() {
+        db.close();
+    }
+
+    public void kisiEkle(Kisi kisiOzellikleri) {
+        open();
+        ContentValues values = new ContentValues();
+        values.put("ad", kisiOzellikleri.getAd());
+        values.put("soyad", kisiOzellikleri.getSoyad());
+        values.put("dogum_tarihi", kisiOzellikleri.getDogum_tarihi().toString());
+        values.put("telefon_no", kisiOzellikleri.getTelefon_no());
+        values.put("adres", kisiOzellikleri.getAdres());
+        values.put("sevdigi_renk", kisiOzellikleri.getSevdigi_renkler());
+        values.put("takimi", kisiOzellikleri.getTakim());
+        values.put("hobiler", kisiOzellikleri.getHobi());
+        values.put("goz_rengi", kisiOzellikleri.getGoz_rengi());
+        db.insert("kisiler", null, values);
+        close();
+    }
+
+    public void kisiGuncelle(Kisi kisiOzellikleri) {
+        open();
+        ContentValues values = new ContentValues();
+        values.put("ad", kisiOzellikleri.getAd());
+        values.put("soyad", kisiOzellikleri.getSoyad());
+        values.put("dogum_tarihi", kisiOzellikleri.getDogum_tarihi().toString());
+        values.put("telefon_no", kisiOzellikleri.getTelefon_no());
+        values.put("adres", kisiOzellikleri.getAdres());
+        values.put("sevdigi_renk", kisiOzellikleri.getSevdigi_renkler());
+        values.put("takimi", kisiOzellikleri.getTakim());
+        values.put("hobiler", kisiOzellikleri.getHobi());
+        values.put("goz_rengi", kisiOzellikleri.getGoz_rengi());
+        db.update("kisiler", values, "id = " + kisiOzellikleri.getId(), null);
+        close();
+    }
+
+    public List<Kisi> kisileriListele(){
+        open();
+        List<Kisi> kisilerListesi = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT * FROM kisiler",null);
+        if (cursor != null && !cursor.isClosed()){
+            while(cursor.moveToNext()){
+                Kisi ornekKisi = new Kisi();
+                ornekKisi.setId(cursor.getInt(cursor.getColumnIndex("id")));
+                ornekKisi.setAd(cursor.getString(cursor.getColumnIndex("ad")));
+                ornekKisi.setSoyad(cursor.getString(cursor.getColumnIndex("soyad")));
+                ornekKisi.setDogum_tarihi(cursor.getString(cursor.getColumnIndex("dogum_tarihi")));
+                ornekKisi.setTelefon_no(cursor.getString(cursor.getColumnIndex("telefon_no")));
+                ornekKisi.setAdres(cursor.getString(cursor.getColumnIndex("adres")));
+                ornekKisi.setSevdigi_renkler(cursor.getString(cursor.getColumnIndex("sevdigi_renk")));
+                ornekKisi.setTakim(cursor.getString(cursor.getColumnIndex("takimi")));
+                ornekKisi.setHobi(cursor.getString(cursor.getColumnIndex("hobiler")));
+                ornekKisi.setGoz_rengi(cursor.getString(cursor.getColumnIndex("goz_rengi")));
+                kisilerListesi.add(ornekKisi);
+            }
+            cursor.close();
+        }
+
+        close();
+        return kisilerListesi;
+    }
+
+
+
+    public void kisiSil(int id) {
+        open();
+        db.delete("kisiler", "id = " + id, null);
+        close();
+    }
+
+
+    public class DatabaseHelper extends SQLiteOpenHelper {
+
+        public DatabaseHelper(Context context) {
+            super(context, DATABASE_NAME, null, VERSION);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase sqLiteDatabase) {
+            sqLiteDatabase.execSQL("CREATE TABLE [Kisiler] (\n" +
+                    "  [id] INTEGER PRIMARY KEY AUTOINCREMENT, \n" +
+                    "  [ad] TEXT, \n" +
+                    "  [soyad] TEXT, \n" +
+                    "  [dogum_tarihi] TEXT, \n" +
+                    "  [telefon_no] TEXT, \n" +
+                    "  [adres] TEXT, \n" +
+                    "  [sevdigi_renk] TEXT, \n" +
+                    "  [takimi] TEXT, \n" +
+                    "  [hobiler] TEXT, \n" +
+                    "  [goz_rengi] TEXT);\n");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+
+        }
+    }
+}
